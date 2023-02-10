@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "pylox"
+version = "0.1.0"
+description = "A Python implementation of the Lox language"
+authors = ["Guillaume Pagnoux <gpagnoux@gmail.com>"]
+readme = "README.org"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+
+[tool.poetry.scripts]
+pylox = "pylox:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
