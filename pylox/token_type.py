@@ -56,3 +56,4 @@ class TokenType(Enum):
     WHILE = auto()
 
     EOF = auto()
+

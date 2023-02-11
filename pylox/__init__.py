@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+from pylox.scanner import Scanner
+
 had_error = False
 
 
@@ -44,8 +46,7 @@ def run_prompt() -> None:
 
 
 def run(source: str) -> None:
-    tokens = source.split()
-
+    tokens = Scanner(source).scan_tokens()
     for token in tokens:
         print(token)
 
