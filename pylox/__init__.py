@@ -3,6 +3,8 @@ from pathlib import Path
 
 from pylox.scanner import Scanner
 
+import pylox.expr
+
 had_error = False
 
 
