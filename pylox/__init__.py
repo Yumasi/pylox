@@ -1,11 +1,12 @@
 import sys
 from pathlib import Path
+from typing import cast
+from pylox.ast_printer import AstPrinter
+from pylox.expr import Expr
+from pylox.parser import Parser
 
 from pylox.scanner import Scanner
-
-import pylox.expr
-
-had_error = False
+from pylox.error import LoxError
 
 
 def main() -> None:
@@ -21,8 +22,6 @@ def main() -> None:
 
 
 def run_file(path: Path) -> None:
-    global had_error
-
     if not path.exists():
         raise RuntimeError("could not open Lox script")
 
@@ -30,13 +29,11 @@ def run_file(path: Path) -> None:
     run(content)
 
     # Indicate an error in the system exit code.
-    if had_error:
+    if LoxError.had_error():
         sys.exit(65)
 
 
 def run_prompt() -> None:
-    global had_error
-
     while True:
         try:
             line = input("> ")
@@ -44,21 +41,17 @@ def run_prompt() -> None:
             break
 
         run(line)
-        had_error = False
+        LoxError.reset_error()
 
 
 def run(source: str) -> None:
     tokens = Scanner(source).scan_tokens()
-    for token in tokens:
-        print(token)
+    parser = Parser(tokens)
 
+    expression = parser.parse()
 
-def error(line: int, message: str) -> None:
-    report(line, "", message)
+    if LoxError.had_error():
+        return
 
-
-def report(line: int, where: str, message: str):
-    global had_error
-
-    print(f"[line {line}] Error {where}: {message}")
-    had_error = True
+    expression = cast(Expr, expression)
+    print(AstPrinter().print(expression))

@@ -1,1 +1,12 @@
 #+title: Pylox
+
+* Running Pylox
+** Prerequisites
+- Poetry
+- Python >= 3.10
+
+** Running with Poetry
+#+begin_src shell
+poetry run pylox        # To run in REPL mode
+poetry run pylox <script> # To execute a script
+#+end_src

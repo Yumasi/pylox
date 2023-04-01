@@ -11,6 +11,7 @@ python = "^3.10"
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
 isort = "^5.12.0"
+pyflakes = "^3.0.1"
 
 [tool.poetry.scripts]
 pylox = "pylox:main"

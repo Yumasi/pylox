@@ -1,5 +1,6 @@
 from typing import Any, List, Optional
 
+from pylox.error import LoxError
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -40,7 +41,6 @@ class Scanner:
         return self.tokens
 
     def _scan_token(self) -> None:
-        from pylox import error
         c = self._advance()
 
         match c:
@@ -92,18 +92,16 @@ class Scanner:
                 elif c.isalpha():
                     self._identifier()
                 else:
-                    error(self.line, f"Unexpected character '{c}'")
+                    LoxError.errorAt(self.line, f"Unexpected character '{c}'")
 
     def _string(self) -> None:
-        from pylox import error
-
         while self._peek() != '"' and not self._is_at_end():
             if self._peek() == "\n":
                 self.line += 1
             self._advance()
 
         if self._is_at_end():
-            error(self.line, "Unterminated string.")
+            LoxError.errorAt(self.line, "Unterminated string.")
             return
 
         # The closing ".
@@ -136,12 +134,10 @@ class Scanner:
         self._add_token(type)
 
     def _multiline_comment(self) -> None:
-        from pylox import error
-
         first_line = self.line
         while (c := self._peek()) != "*" or self._peek_next() != "/":
             if self._is_at_end():
-                error(first_line, "unterminated multi-line comment")
+                LoxError.errorAt(first_line, "unterminated multi-line comment")
                 return
             if c == "\n":
                 self.line += 1
