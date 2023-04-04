@@ -21,10 +21,10 @@ class Parser:
         except ParseError:
             return None
 
-    def _expression(self) -> Expr:
+    def _expression(self) -> Optional[Expr]:
         return self._comma()
 
-    def _comma(self) -> Expr:
+    def _comma(self) -> Optional[Expr]:
         expr = self._conditional()
         while self._match(TokenType.COMMA):
             operator = self._previous()
@@ -33,7 +33,7 @@ class Parser:
 
         return expr
 
-    def _conditional(self) -> Expr:
+    def _conditional(self) -> Optional[Expr]:
         expr = self._equality()
         if self._match(TokenType.QUESTION):
             left = self._expression()
@@ -46,7 +46,7 @@ class Parser:
 
         return expr
 
-    def _equality(self) -> Expr:
+    def _equality(self) -> Optional[Expr]:
         expr = self._comparison()
         while self._match(
             TokenType.BANG_EQUAL,
@@ -58,7 +58,7 @@ class Parser:
 
         return expr
 
-    def _comparison(self) -> Expr:
+    def _comparison(self) -> Optional[Expr]:
         expr = self._term()
         while self._match(
             TokenType.GREATER,
@@ -72,7 +72,7 @@ class Parser:
 
         return expr
 
-    def _term(self) -> Expr:
+    def _term(self) -> Optional[Expr]:
         expr = self._factor()
         while self._match(
             TokenType.PLUS,
@@ -84,7 +84,7 @@ class Parser:
 
         return expr
 
-    def _factor(self) -> Expr:
+    def _factor(self) -> Optional[Expr]:
         expr = self._unary()
         while self._match(
             TokenType.SLASH,
@@ -96,7 +96,7 @@ class Parser:
 
         return expr
 
-    def _unary(self) -> Expr:
+    def _unary(self) -> Optional[Expr]:
         if self._match(
             TokenType.BANG,
             TokenType.MINUS,
@@ -107,7 +107,7 @@ class Parser:
 
         return self._primary()
 
-    def _primary(self) -> Expr:
+    def _primary(self) -> Optional[Expr]:
         if self._match(TokenType.FALSE):
             return Literal(False)
         if self._match(TokenType.TRUE):
@@ -122,6 +122,48 @@ class Parser:
             expr = self._expression()
             self._consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return Grouping(expr)
+
+        # Error production
+        if self._match(TokenType.COMMA):
+            self._error(self._previous(), "Missing left-hand operand.")
+            self._conditional()
+            return None
+
+        if self._match(TokenType.QUESTION):
+            self._error(self._previous(), "Missing condition operand.")
+            self._expression()
+            self._consume(
+                TokenType.COLON,
+                "Expect ':' after left-hand expression in ternary expression.",
+            )
+            self._conditional()
+
+            return None
+
+        if self._match(TokenType.EQUAL_EQUAL, TokenType.BANG_EQUAL):
+            self._error(self._previous(), "Missing left-hand operand.")
+            self._comparison()
+            return None
+
+        if self._match(
+            TokenType.GREATER,
+            TokenType.GREATER_EQUAL,
+            TokenType.LESS,
+            TokenType.LESS_EQUAL,
+        ):
+            self._error(self._previous(), "Missing left-hand operand.")
+            self._term()
+            return None
+
+        if self._match(TokenType.PLUS):
+            self._error(self._previous(), "Missing left-hand operand.")
+            self._factor()
+            return None
+
+        if self._match(TokenType.SLASH, TokenType.STAR):
+            self._error(self._previous(), "Missing left-hand operand.")
+            self._unary()
+            return None
 
         raise self._error(self._peek(), "Expect expression.")
 
@@ -166,7 +208,7 @@ class Parser:
 
     def _error(self, token: Token, message: str) -> ParseError:
         LoxError.errorToken(token, message)
-        raise ParseError()
+        return ParseError()
 
     def _synchronise(self) -> None:
         self._advance()

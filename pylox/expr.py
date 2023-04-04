@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Protocol, TypeVar
+from typing import Any, Optional, Protocol, TypeVar
 
 from pylox.token import Token
 
@@ -15,9 +15,9 @@ class Expr(ABC):
 
 @dataclass
 class Conditional(Expr):
-    condition: Expr
-    left: Expr
-    right: Expr
+    condition: Optional[Expr]
+    left: Optional[Expr]
+    right: Optional[Expr]
 
     def accept(self, visitor: "ExprVisitor[T]") -> T:
         return visitor.visitConditionalExpr(self)
@@ -25,9 +25,9 @@ class Conditional(Expr):
 
 @dataclass
 class Binary(Expr):
-    left: Expr
+    left: Optional[Expr]
     operator: Token
-    right: Expr
+    right: Optional[Expr]
 
     def accept(self, visitor: "ExprVisitor[T]") -> T:
         return visitor.visitBinaryExpr(self)
@@ -35,7 +35,7 @@ class Binary(Expr):
 
 @dataclass
 class Grouping(Expr):
-    expression: Expr
+    expression: Optional[Expr]
 
     def accept(self, visitor: "ExprVisitor[T]") -> T:
         return visitor.visitGroupingExpr(self)
@@ -52,7 +52,7 @@ class Literal(Expr):
 @dataclass
 class Unary(Expr):
     operator: Token
-    right: Expr
+    right: Optional[Expr]
 
     def accept(self, visitor: "ExprVisitor[T]") -> T:
         return visitor.visitUnaryExpr(self)

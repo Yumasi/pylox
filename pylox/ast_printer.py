@@ -1,3 +1,4 @@
+from typing import Optional
 from pylox.expr import Binary, Conditional, Expr, ExprVisitor, Grouping, Literal, Unary
 
 
@@ -22,9 +23,13 @@ class AstPrinter(ExprVisitor[str]):
     def visitUnaryExpr(self, expr: Unary) -> str:
         return self._parenthesize(expr.operator.lexeme, expr.right)
 
-    def _parenthesize(self, name: str, *exprs: Expr) -> str:
+    def _parenthesize(self, name: str, *exprs: Optional[Expr]) -> str:
         result = f"({name}"
         for expr in exprs:
+            if not expr:
+                result += " <None>"
+                continue
+
             result += f" {expr.accept(self)}"
         result += ")"
 
@@ -52,9 +57,13 @@ class RPNAstPrinter(ExprVisitor[str]):
     def visitUnaryExpr(self, expr: Unary) -> str:
         return self._rpn(expr.operator.lexeme, expr.right)
 
-    def _rpn(self, name: str, *exprs: Expr) -> str:
+    def _rpn(self, name: str, *exprs: Optional[Expr]) -> str:
         result = ""
         for expr in exprs:
+            if not expr:
+                result += "<None> "
+                continue
+
             result += f"{expr.accept(self)} "
         result += name
 
