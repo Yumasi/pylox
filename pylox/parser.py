@@ -22,7 +22,16 @@ class Parser:
             return None
 
     def _expression(self) -> Expr:
-        return self._equality()
+        return self._comma()
+
+    def _comma(self) -> Expr:
+        expr = self._equality()
+        while self._match(TokenType.COMMA):
+            operator = self._previous()
+            right = self._equality()
+            expr = Binary(expr, operator, right)
+
+        return expr
 
     def _equality(self) -> Expr:
         expr = self._comparison()

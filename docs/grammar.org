@@ -1,0 +1,28 @@
+#+title: Lox Grammar rules
+
+* Base syntax
+#+begin_src text
+expression => equality ;
+equality   => comparison ( ("==" | "!=") comparison )* ;
+comparison => term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term       => factor ( ( "+" | "-" ) factor )* ;
+factor     => unary ( ( "/" | "*" ) unary )* ;
+unary      => ( "!" | "-" ) unary
+            | primary;
+primary    => NUMBER | STRING | "true" | "false" | "nil"
+            | "(" expression ")" ;
+#+end_src
+
+* Comma expression
+#+begin_src text
+expression => comma ;
+comma      => equality ( "," equality )* ;
+equality   => comparison ( ("==" | "!=") comparison )* ;
+comparison => term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term       => factor ( ( "+" | "-" ) factor )* ;
+factor     => unary ( ( "/" | "*" ) unary )* ;
+unary      => ( "!" | "-" ) unary
+            | primary;
+primary    => NUMBER | STRING | "true" | "false" | "nil"
+            | "(" expression ")" ;
+#+end_src
