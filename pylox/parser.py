@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from pylox.error import LoxError
-from pylox.expr import Binary, Expr, Grouping, Literal, Unary
+from pylox.expr import Binary, Conditional, Expr, Grouping, Literal, Unary
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -25,11 +25,24 @@ class Parser:
         return self._comma()
 
     def _comma(self) -> Expr:
-        expr = self._equality()
+        expr = self._conditional()
         while self._match(TokenType.COMMA):
             operator = self._previous()
-            right = self._equality()
+            right = self._conditional()
             expr = Binary(expr, operator, right)
+
+        return expr
+
+    def _conditional(self) -> Expr:
+        expr = self._equality()
+        if self._match(TokenType.QUESTION):
+            left = self._expression()
+            self._consume(
+                TokenType.COLON,
+                "Expect ':' after left-hand expression in ternary expression.",
+            )
+            right = self._conditional()
+            expr = Conditional(expr, left, right)
 
         return expr
 

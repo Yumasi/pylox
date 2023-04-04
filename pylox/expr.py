@@ -14,6 +14,16 @@ class Expr(ABC):
 
 
 @dataclass
+class Conditional(Expr):
+    condition: Expr
+    left: Expr
+    right: Expr
+
+    def accept(self, visitor: "ExprVisitor[T]") -> T:
+        return visitor.visitConditionalExpr(self)
+
+
+@dataclass
 class Binary(Expr):
     left: Expr
     operator: Token
@@ -49,6 +59,9 @@ class Unary(Expr):
 
 
 class ExprVisitor(Protocol[T]):
+    def visitConditionalExpr(self, expr: Conditional) -> T:
+        ...
+
     def visitBinaryExpr(self, expr: Binary) -> T:
         ...
 

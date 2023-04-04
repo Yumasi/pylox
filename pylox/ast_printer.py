@@ -1,9 +1,12 @@
-from pylox.expr import Binary, Expr, ExprVisitor, Grouping, Literal, Unary
+from pylox.expr import Binary, Conditional, Expr, ExprVisitor, Grouping, Literal, Unary
 
 
 class AstPrinter(ExprVisitor[str]):
     def print(self, expr: Expr) -> str:
         return expr.accept(self)
+
+    def visitConditionalExpr(self, expr: Conditional) -> str:
+        return self._parenthesize("?", expr.condition, expr.left, expr.right)
 
     def visitBinaryExpr(self, expr: Binary) -> str:
         return self._parenthesize(expr.operator.lexeme, expr.left, expr.right)
@@ -31,6 +34,9 @@ class AstPrinter(ExprVisitor[str]):
 class RPNAstPrinter(ExprVisitor[str]):
     def print(self, expr: Expr) -> str:
         return expr.accept(self)
+
+    def visitConditionalExpr(self, expr: Conditional) -> str:
+        return self._rpn("?", expr.condition, expr.left, expr.right)
 
     def visitBinaryExpr(self, expr: Binary) -> str:
         return self._rpn(expr.operator.lexeme, expr.left, expr.right)
