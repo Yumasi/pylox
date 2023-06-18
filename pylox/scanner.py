@@ -125,7 +125,7 @@ class Scanner:
             while (c := self._peek()) and c.isdigit():
                 self._advance()
 
-        self._add_token(TokenType.NUMBER, int(self.source[self.start:self.current]))
+        self._add_token(TokenType.NUMBER, float(self.source[self.start:self.current]))
 
     def _identifier(self) -> None:
         while (c := self._peek()) and (c.isidentifier()):
