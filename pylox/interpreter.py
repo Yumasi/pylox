@@ -1,16 +1,31 @@
-from typing import Any
+from typing import Any, List
+from pylox.environment import Environment
 from pylox.error import LoxError, LoxRuntimeError
 
-from pylox.expr import Binary, Conditional, Expr, ExprVisitor, Grouping, Literal, Unary
+from pylox.expr import (
+    Assign,
+    Binary,
+    Conditional,
+    Expr,
+    ExprVisitor,
+    Grouping,
+    Literal,
+    Unary,
+    Variable,
+)
+from pylox.stmt import Expression, Print, Stmt, StmtVisitor, Var
 from pylox.token import Token
 from pylox.token_type import TokenType
 
 
-class Interpreter(ExprVisitor[Any]):
-    def interpret(self, expr: Expr) -> None:
+class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
+    def __init__(self) -> None:
+        self.environment = Environment()
+
+    def interpret(self, statements: List[Stmt]) -> None:
         try:
-            value: Any = self._evaluate(expr)
-            print(self._stringify(value))
+            for statement in statements:
+                self._execute(statement)
         except LoxRuntimeError as e:
             LoxError.runtimeError(e)
 
@@ -64,7 +79,7 @@ class Interpreter(ExprVisitor[Any]):
         return None
 
     def visitConditionalExpr(self, expr: Conditional) -> Any:
-        return None  # TODO
+        return self._evaluate(expr.left) if self._evaluate(expr.condition) else self._evaluate(expr.right)  # type: ignore
 
     def visitGroupingExpr(self, expr: Grouping) -> Any:
         return self._evaluate(expr.expression)  # type: ignore
@@ -85,8 +100,34 @@ class Interpreter(ExprVisitor[Any]):
         # Unreachable
         return None
 
+    def visitVariableExpr(self, expr: Variable) -> Any:
+        return self.environment.get(expr.name)
+
+    def visitExpressionStmt(self, stmt: Expression) -> None:
+        self._evaluate(stmt.expression)
+
+    def visitPrintStmt(self, stmt: Print) -> None:
+        value = self._evaluate(stmt.expression)
+        print(self._stringify(value))
+
+    def visitVarStmt(self, stmt: Var) -> None:
+        value = None
+        if stmt.initializer:
+            value = self._evaluate(stmt.initializer)
+
+        self.environment.define(stmt.name.lexeme, value)
+
+    def visitAssignExpr(self, expr: Assign) -> Any:
+        value = self._evaluate(expr.value)
+        self.environment.assign(expr.name, value)
+
+        return value
+
     def _evaluate(self, expr: Expr) -> Any:
         return expr.accept(self)
+
+    def _execute(self, stmt: Stmt) -> None:
+        stmt.accept(self)
 
     def _isTruthy(self, object: Any) -> bool:
         if object is None:
@@ -116,7 +157,7 @@ class Interpreter(ExprVisitor[Any]):
         if type(object) is float:
             text = str(object)
             if text.endswith(".0"):
-                text = text[0:len(text) - 2]
+                text = text[0 : len(text) - 2]
 
             return text
 

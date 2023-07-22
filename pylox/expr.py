@@ -24,6 +24,15 @@ class Conditional(Expr):
 
 
 @dataclass
+class Assign(Expr):
+    name: Token
+    value: Expr
+
+    def accept(self, visitor: "ExprVisitor[T]") -> T:
+        return visitor.visitAssignExpr(self)
+
+
+@dataclass
 class Binary(Expr):
     left: Optional[Expr]
     operator: Token
@@ -58,8 +67,19 @@ class Unary(Expr):
         return visitor.visitUnaryExpr(self)
 
 
+@dataclass
+class Variable(Expr):
+    name: Token
+
+    def accept(self, visitor: "ExprVisitor[T]") -> T:
+        return visitor.visitVariableExpr(self)
+
+
 class ExprVisitor(Protocol[T]):
     def visitConditionalExpr(self, expr: Conditional) -> T:
+        ...
+
+    def visitAssignExpr(self, expr: Assign) -> T:
         ...
 
     def visitBinaryExpr(self, expr: Binary) -> T:
@@ -72,4 +92,7 @@ class ExprVisitor(Protocol[T]):
         ...
 
     def visitUnaryExpr(self, expr: Unary) -> T:
+        ...
+
+    def visitVariableExpr(self, expr: Variable) -> T:
         ...

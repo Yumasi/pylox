@@ -1,7 +1,17 @@
 from typing import List, Optional
 
 from pylox.error import LoxError
-from pylox.expr import Binary, Conditional, Expr, Grouping, Literal, Unary
+from pylox.expr import (
+    Assign,
+    Binary,
+    Conditional,
+    Expr,
+    Grouping,
+    Literal,
+    Unary,
+    Variable,
+)
+from pylox.stmt import Expression, Print, Stmt, Var
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -15,11 +25,48 @@ class Parser:
         self.tokens: List[Token] = tokens
         self.current: int = 0
 
-    def parse(self) -> Optional[Expr]:
+    def parse(self) -> List[Stmt]:
+        statements: List[Stmt] = []
+        while not self._isAtEnd():
+            statements.append(self._declaration())  # type: ignore
+
+        return statements
+
+    def _declaration(self) -> Optional[Stmt]:
         try:
-            return self._expression()
+            if self._match(TokenType.VAR):
+                return self._varDeclaration()
+
+            return self._statement()
         except ParseError:
+            self._synchronise()
             return None
+
+    def _varDeclaration(self) -> Stmt:
+        name: Token = self._consume(TokenType.IDENTIFIER, "Expect variable name.")
+
+        initializer: Optional[Expr] = None
+        if self._match(TokenType.EQUAL):
+            initializer = self._expression()
+
+        self._consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return Var(name, initializer)
+
+    def _statement(self) -> Stmt:
+        if self._match(TokenType.PRINT):
+            return self._printStatement()
+
+        return self._expressionStatement()
+
+    def _printStatement(self) -> Stmt:
+        value = self._expression()
+        self._consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return Print(value)  # type:ignore
+
+    def _expressionStatement(self) -> Stmt:
+        expr = self._expression()
+        self._consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        return Expression(expr)  # type:ignore
 
     def _expression(self) -> Optional[Expr]:
         return self._comma()
@@ -34,7 +81,7 @@ class Parser:
         return expr
 
     def _conditional(self) -> Optional[Expr]:
-        expr = self._equality()
+        expr = self._assignment()
         if self._match(TokenType.QUESTION):
             left = self._expression()
             self._consume(
@@ -43,6 +90,21 @@ class Parser:
             )
             right = self._conditional()
             expr = Conditional(expr, left, right)
+
+        return expr
+
+    def _assignment(self) -> Optional[Expr]:
+        expr = self._equality()
+
+        if self._match(TokenType.EQUAL):
+            equals: Token = self._previous()
+            value: Optional[Expr] = self._assignment()
+
+            if isinstance(expr, Variable):
+                name: Token = expr.name
+                return Assign(name, value)  # type:ignore
+
+            self._error(equals, "Invalid assignment target.")
 
         return expr
 
@@ -117,6 +179,9 @@ class Parser:
 
         if self._match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self._previous().literal)
+
+        if self._match(TokenType.IDENTIFIER):
+            return Variable(self._previous())
 
         if self._match(TokenType.LEFT_PAREN):
             expr = self._expression()

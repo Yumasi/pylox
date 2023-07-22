@@ -52,11 +52,10 @@ def run_prompt(interpreter: Interpreter) -> None:
 def run(interpreter: Interpreter, source: str) -> None:
     tokens = Scanner(source).scan_tokens()
     parser = Parser(tokens)
-
-    expression = parser.parse()
+    statements = parser.parse()
 
     # Stop if there was a syntax error
     if LoxError.had_error():
         return
 
-    interpreter.interpret(expression)
+    interpreter.interpret(statements)

@@ -41,3 +41,32 @@ unary       => ( "!" | "-" ) unary
 primary     => NUMBER | STRING | "true" | "false" | "nil"
              | "(" expression ")" ;
 #+end_src
+
+* Statements
+
+#+begin_src text
+program     => declaration* EOF ;
+
+declaration => varDecl
+             | statement
+statement   => exprStmt
+             | printStmt ;
+varDecl     => "var" IDENTIFIER ( "=" expression )? ";" ;
+exprStmt    => expression ";" ;
+printStmt   => "print" expression ";" ;
+
+expression  => comma ;
+comma       => conditional ( "," conditional )* ;
+conditional => assignment ( "?" expression ":" conditional )? ;
+assignment  => IDENTIFIER "=" assignment
+             | equality ;
+equality    => comparison ( ("==" | "!=") comparison )* ;
+comparison  => term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term        => factor ( ( "+" | "-" ) factor )* ;
+factor      => unary ( ( "/" | "*" ) unary )* ;
+unary       => ( "!" | "-" ) unary
+             | primary;
+primary     => NUMBER | STRING | "true" | "false" | "nil"
+             | "(" expression ")" ;
+             | IDENTIFIER ;
+#+end_src
