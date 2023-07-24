@@ -11,7 +11,7 @@ from pylox.expr import (
     Unary,
     Variable,
 )
-from pylox.stmt import Expression, Print, Stmt, Var
+from pylox.stmt import Block, Expression, Print, Stmt, Var
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -56,6 +56,9 @@ class Parser:
         if self._match(TokenType.PRINT):
             return self._printStatement()
 
+        if self._match(TokenType.LEFT_BRACE):
+            return Block(self._block())
+
         return self._expressionStatement()
 
     def _printStatement(self) -> Stmt:
@@ -67,6 +70,15 @@ class Parser:
         expr = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return Expression(expr)  # type:ignore
+
+    def _block(self) -> List[Stmt]:
+        statements: List[Stmt] = []
+
+        while not self._check(TokenType.RIGHT_BRACE) and not self._isAtEnd():
+            statements.append(self._declaration())  # type:ignore
+
+        self._consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return statements
 
     def _expression(self) -> Optional[Expr]:
         return self._comma()

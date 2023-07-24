@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional, Protocol, TypeVar
+from typing import List, Optional, Protocol, TypeVar
 
 from pylox.token import Token
 from pylox.expr import Expr
@@ -12,6 +12,14 @@ class Stmt(ABC):
     @abstractmethod
     def accept(self, visitor: "StmtVisitor[T]") -> T:
         ...
+
+
+@dataclass
+class Block(Stmt):
+    statements: List[Stmt]
+
+    def accept(self, visitor: "StmtVisitor[T]") -> T:
+        return visitor.visitBlockStmt(self)
 
 
 @dataclass
@@ -40,6 +48,9 @@ class Var(Stmt):
 
 
 class StmtVisitor(Protocol[T]):
+    def visitBlockStmt(self, stmt: Block) -> T:
+        ...
+
     def visitExpressionStmt(self, stmt: Expression) -> T:
         ...
 

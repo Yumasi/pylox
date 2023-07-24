@@ -13,7 +13,7 @@ from pylox.expr import (
     Unary,
     Variable,
 )
-from pylox.stmt import Expression, Print, Stmt, StmtVisitor, Var
+from pylox.stmt import Block, Expression, Print, Stmt, StmtVisitor, Var
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -117,6 +117,9 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
 
         self.environment.define(stmt.name.lexeme, value)
 
+    def visitBlockStmt(self, stmt: Block) -> None:
+        self._executeBlock(stmt.statements, Environment(self.environment))
+
     def visitAssignExpr(self, expr: Assign) -> Any:
         value = self._evaluate(expr.value)
         self.environment.assign(expr.name, value)
@@ -128,6 +131,18 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
 
     def _execute(self, stmt: Stmt) -> None:
         stmt.accept(self)
+
+    def _executeBlock(self, statements: List[Stmt], environment: Environment):
+        previous = self.environment
+
+        try:
+            self.environment = environment
+
+            for statement in statements:
+                self._execute(statement)
+
+        finally:
+            self.environment = previous
 
     def _isTruthy(self, object: Any) -> bool:
         if object is None:
