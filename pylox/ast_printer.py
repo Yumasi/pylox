@@ -1,4 +1,5 @@
 from typing import Optional
+
 from pylox.expr import Binary, Conditional, Expr, ExprVisitor, Grouping, Literal, Unary
 
 

@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional, Protocol, TypeVar
 
-from pylox.token import Token
 from pylox.expr import Expr
+from pylox.token import Token
 
 T = TypeVar("T", covariant=True)
 

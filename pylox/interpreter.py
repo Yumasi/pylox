@@ -1,7 +1,7 @@
 from typing import Any, List
+
 from pylox.environment import Environment
 from pylox.error import LoxError, LoxRuntimeError
-
 from pylox.expr import (
     Assign,
     Binary,
@@ -54,11 +54,11 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
                 self._checkNumberOperands(expr.operator, left, right)
                 return left - right
             case TokenType.PLUS:
-                if type(left) is float and type(right) is float:
+                if isinstance(left, float) and isinstance(right, float):
                     return left + right
-                if type(left) is str and type(right) is str:
+                if isinstance(left, str) and isinstance(right, str):
                     return left + right
-                if type(left) is str or type(right) is str:
+                if isinstance(left, str) or isinstance(right, str):
                     return self._stringify(left) + self._stringify(right)
 
                 raise LoxRuntimeError(
@@ -148,19 +148,19 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
         if object is None:
             return False
 
-        if type(object) is bool:
+        if isinstance(object, bool):
             return object
 
         return True
 
     def _checkNumberOperand(self, operator: Token, operand: Any) -> None:
-        if type(operand) is float:
+        if isinstance(operand, float):
             return
 
         raise LoxRuntimeError(operator, "Operand must be a number.")
 
     def _checkNumberOperands(self, operator: Token, left: Any, right: Any) -> None:
-        if type(left) is float and type(right) is float:
+        if isinstance(left, float) and isinstance(right, float):
             return
 
         raise LoxRuntimeError(operator, "Operands must be numbers")
@@ -169,14 +169,14 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
         if object is None:
             return "nil"
 
-        if type(object) is float:
+        if isinstance(object, float):
             text = str(object)
             if text.endswith(".0"):
                 text = text[0 : len(text) - 2]
 
             return text
 
-        if type(object) is bool:
+        if isinstance(object, bool):
             return "true" if object else "false"
 
         return str(object)

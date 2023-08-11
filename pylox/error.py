@@ -1,10 +1,12 @@
 from pylox.token import Token
 from pylox.token_type import TokenType
 
+
 class LoxRuntimeError(RuntimeError):
     def __init__(self, token: Token, *args: object) -> None:
         super().__init__(*args)
         self.token: Token = token
+
 
 class LoxError:
     _had_error: bool = False
@@ -30,7 +32,6 @@ class LoxError:
             cls.report(token.line, "at end", message)
         else:
             cls.report(token.line, f"at '{token.lexeme}'", message)
-
 
     @classmethod
     def had_error(cls) -> bool:

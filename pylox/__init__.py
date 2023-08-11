@@ -1,13 +1,10 @@
 import sys
 from pathlib import Path
-from typing import cast
-from pylox.ast_printer import AstPrinter
-from pylox.expr import Expr
+
+from pylox.error import LoxError
 from pylox.interpreter import Interpreter
 from pylox.parser import Parser
-
 from pylox.scanner import Scanner
-from pylox.error import LoxError
 
 
 def main() -> None:

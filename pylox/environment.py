@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
-from pylox.error import LoxRuntimeError
 
+from pylox.error import LoxRuntimeError
 from pylox.token import Token
 
 
