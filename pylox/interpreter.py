@@ -10,10 +10,11 @@ from pylox.expr import (
     ExprVisitor,
     Grouping,
     Literal,
+    Logical,
     Unary,
     Variable,
 )
-from pylox.stmt import Block, Expression, Print, Stmt, StmtVisitor, Var
+from pylox.stmt import Block, Expression, If, Print, Stmt, StmtVisitor, Var
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -87,6 +88,18 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
     def visitLiteralExpr(self, expr: Literal) -> Any:
         return expr.value
 
+    def visitLogicalExpr(self, expr: Logical) -> Any:
+        left = self._evaluate(expr.left)
+
+        if expr.operator.type == TokenType.OR:
+            if self._isTruthy(left):
+                return left
+        else:
+            if not self._isTruthy(left):
+                return left
+
+        return self._evaluate(expr.right)
+
     def visitUnaryExpr(self, expr: Unary) -> Any:
         right = self._evaluate(expr.right)  # type: ignore
 
@@ -105,6 +118,12 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
 
     def visitExpressionStmt(self, stmt: Expression) -> None:
         self._evaluate(stmt.expression)
+
+    def visitIfStmt(self, stmt: If) -> None:
+        if self._isTruthy(self._evaluate(stmt.condition)):
+            self._execute(stmt.thenBranch)
+        elif stmt.elseBranch:
+            self._execute(stmt.elseBranch)
 
     def visitPrintStmt(self, stmt: Print) -> None:
         value = self._evaluate(stmt.expression)

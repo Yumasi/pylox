@@ -31,6 +31,16 @@ class Expression(Stmt):
 
 
 @dataclass
+class If(Stmt):
+    condition: Expr
+    thenBranch: Stmt
+    elseBranch: Optional[Stmt]
+
+    def accept(self, visitor: "StmtVisitor[T]") -> T:
+        return visitor.visitIfStmt(self)
+
+
+@dataclass
 class Print(Stmt):
     expression: Expr
 
@@ -52,6 +62,9 @@ class StmtVisitor(Protocol[T]):
         ...
 
     def visitExpressionStmt(self, stmt: Expression) -> T:
+        ...
+
+    def visitIfStmt(self, stmt: If) -> T:
         ...
 
     def visitPrintStmt(self, stmt: Print) -> T:

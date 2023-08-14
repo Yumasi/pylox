@@ -59,6 +59,16 @@ class Literal(Expr):
 
 
 @dataclass
+class Logical(Expr):
+    left: Expr
+    operator: Token
+    right: Expr
+
+    def accept(self, visitor: "ExprVisitor[T]") -> T:
+        return visitor.visitLogicalExpr(self)
+
+
+@dataclass
 class Unary(Expr):
     operator: Token
     right: Optional[Expr]
@@ -89,6 +99,9 @@ class ExprVisitor(Protocol[T]):
         ...
 
     def visitLiteralExpr(self, expr: Literal) -> T:
+        ...
+
+    def visitLogicalExpr(self, expr: Logical) -> T:
         ...
 
     def visitUnaryExpr(self, expr: Unary) -> T:

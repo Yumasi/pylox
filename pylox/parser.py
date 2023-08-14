@@ -8,10 +8,11 @@ from pylox.expr import (
     Expr,
     Grouping,
     Literal,
+    Logical,
     Unary,
     Variable,
 )
-from pylox.stmt import Block, Expression, Print, Stmt, Var
+from pylox.stmt import Block, Expression, If, Print, Stmt, Var
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -53,6 +54,9 @@ class Parser:
         return Var(name, initializer)
 
     def _statement(self) -> Stmt:
+        if self._match(TokenType.IF):
+            return self._ifStatement()
+
         if self._match(TokenType.PRINT):
             return self._printStatement()
 
@@ -60,6 +64,18 @@ class Parser:
             return Block(self._block())
 
         return self._expressionStatement()
+
+    def _ifStatement(self):
+        self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self._expression()
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        thenBranch = self._statement()
+        elseBranch = None
+        if self._match(TokenType.ELSE):
+            elseBranch = self._statement()
+
+        return If(condition, thenBranch, elseBranch)
 
     def _printStatement(self) -> Stmt:
         value = self._expression()
@@ -106,7 +122,7 @@ class Parser:
         return expr
 
     def _assignment(self) -> Optional[Expr]:
-        expr = self._equality()
+        expr = self._or()
 
         if self._match(TokenType.EQUAL):
             equals: Token = self._previous()
@@ -117,6 +133,26 @@ class Parser:
                 return Assign(name, value)  # type:ignore
 
             self._error(equals, "Invalid assignment target.")
+
+        return expr
+
+    def _or(self) -> Optional[Expr]:
+        expr = self._and()
+
+        while self._match(TokenType.OR):
+            operator: Token = self._previous()
+            right: Expr = self._and()  # type: ignore
+            expr = Logical(expr, operator, right)  # type: ignore
+
+        return expr
+
+    def _and(self) -> Optional[Expr]:
+        expr = self._equality()
+
+        while self._match(TokenType.AND):
+            operator: Token = self._previous()
+            right: Expr = self._equality()  # type: ignore
+            expr = Logical(expr, operator, right)  # type: ignore
 
         return expr
 
