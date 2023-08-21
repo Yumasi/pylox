@@ -7,6 +7,8 @@ readme = "README.org"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+prompt-toolkit = "^3.0.39"
+pygments = "^2.16.1"
 
 [tool.poetry.group.dev.dependencies]
 python-lsp-server = "^1.7.4"
@@ -14,6 +16,7 @@ python-lsp-ruff = "^1.5.1"
 python-lsp-black = "^1.3.0"
 pylsp-mypy = "^0.6.7"
 pyupgrade = "^3.10.1"
+types-pygments = "^2.16.0.0"
 
 [tool.poetry.scripts]
 pylox = "pylox:main"

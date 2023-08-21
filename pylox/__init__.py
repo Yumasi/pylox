@@ -1,9 +1,15 @@
 import sys
 from pathlib import Path
 
+from prompt_toolkit import PromptSession
+from prompt_toolkit.lexers import PygmentsLexer
+from prompt_toolkit.styles import style_from_pygments_cls
+from pygments.styles.dracula import DraculaStyle
+
 from pylox.error import LoxError
 from pylox.interpreter import Interpreter
 from pylox.parser import Parser
+from pylox.pygments import PLexer
 from pylox.scanner import Scanner
 
 
@@ -36,9 +42,12 @@ def run_file(interpreter: Interpreter, path: Path) -> None:
 
 
 def run_prompt(interpreter: Interpreter) -> None:
+    session: PromptSession = PromptSession(
+        lexer=PygmentsLexer(PLexer), style=style_from_pygments_cls(DraculaStyle)
+    )
     while True:
         try:
-            line = input("> ")
+            line = session.prompt("> ")
         except EOFError:
             break
 

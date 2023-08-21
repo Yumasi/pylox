@@ -23,6 +23,7 @@ KEYWORDS_MAP = {
     "while": TokenType.WHILE,
 }
 
+
 class Scanner:
     def __init__(self, source: str) -> None:
         self.source: str = source
@@ -69,13 +70,21 @@ class Scanner:
             case "*":
                 self._add_token(TokenType.STAR)
             case "!":
-                self._add_token(TokenType.BANG_EQUAL if self._match("=") else TokenType.BANG)
+                self._add_token(
+                    TokenType.BANG_EQUAL if self._match("=") else TokenType.BANG
+                )
             case "=":
-                self._add_token(TokenType.EQUAL_EQUAL if self._match("=") else TokenType.EQUAL)
+                self._add_token(
+                    TokenType.EQUAL_EQUAL if self._match("=") else TokenType.EQUAL
+                )
             case "<":
-                self._add_token(TokenType.LESS_EQUAL if self._match("=") else TokenType.LESS)
+                self._add_token(
+                    TokenType.LESS_EQUAL if self._match("=") else TokenType.LESS
+                )
             case ">":
-                self._add_token(TokenType.GREATER_EQUAL if self._match("=") else TokenType.GREATER)
+                self._add_token(
+                    TokenType.GREATER_EQUAL if self._match("=") else TokenType.GREATER
+                )
             case "/":
                 if self._match("/"):
                     while self._peek() != "\n" and not self._is_at_end():
@@ -112,7 +121,7 @@ class Scanner:
         self._advance()
 
         # Trim the surrounding quotes.
-        value = self.source[self.start + 1:self.current - 1]
+        value = self.source[self.start + 1 : self.current - 1]
         self._add_token(TokenType.STRING, value)
 
     def _number(self) -> None:
@@ -125,13 +134,13 @@ class Scanner:
             while (c := self._peek()) and c.isdigit():
                 self._advance()
 
-        self._add_token(TokenType.NUMBER, float(self.source[self.start:self.current]))
+        self._add_token(TokenType.NUMBER, float(self.source[self.start : self.current]))
 
     def _identifier(self) -> None:
         while (c := self._peek()) and (c.isidentifier()):
             self._advance()
 
-        text = self.source[self.start:self.current]
+        text = self.source[self.start : self.current]
         type = KEYWORDS_MAP.get(text)
         if type is None:
             type = TokenType.IDENTIFIER
@@ -150,7 +159,7 @@ class Scanner:
         self.current += 2
 
     def _add_token(self, type: TokenType, literal: Any = None):
-        text = self.source[self.start:self.current]
+        text = self.source[self.start : self.current]
         self.tokens.append(Token(type, text, literal, self.line))
 
     def _advance(self) -> str:
