@@ -12,7 +12,7 @@ from pylox.expr import (
     Unary,
     Variable,
 )
-from pylox.stmt import Block, Expression, If, Print, Stmt, Var
+from pylox.stmt import Block, Expression, If, Print, Stmt, Var, While
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -54,16 +54,65 @@ class Parser:
         return Var(name, initializer)
 
     def _statement(self) -> Stmt:
+        if self._match(TokenType.FOR):
+            return self._forStatement()
+
         if self._match(TokenType.IF):
             return self._ifStatement()
 
         if self._match(TokenType.PRINT):
             return self._printStatement()
 
+        if self._match(TokenType.WHILE):
+            return self._whileStatement()
+
         if self._match(TokenType.LEFT_BRACE):
             return Block(self._block())
 
         return self._expressionStatement()
+
+    def _forStatement(self) -> Stmt:
+        self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
+
+        initializer: Optional[Stmt] = None
+        if self._match(TokenType.SEMICOLON):
+            initializer = None
+        elif self._match(TokenType.VAR):
+            initializer = self._varDeclaration()
+        else:
+            initializer = self._expressionStatement()
+
+        condition: Optional[Expr] = None
+        if not self._check(TokenType.SEMICOLON):
+            condition = self._expression()
+        self._consume(TokenType.SEMICOLON, "Expect ';' after loop condition.")
+
+        increment: Optional[Expr] = None
+        if not self._check(TokenType.RIGHT_PAREN):
+            increment = self._expression()
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
+
+        body: Stmt = self._statement()
+
+        if increment is not None:
+            body = Block([body, Expression(increment)])
+
+        if condition is None:
+            condition = Literal(True)
+        body = While(condition, body)
+
+        if initializer is not None:
+            body = Block([initializer, body])
+
+        return body
+
+    def _whileStatement(self) -> Stmt:
+        self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition: Expr = self._expression()
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
+        body: Stmt = self._statement()
+
+        return While(condition, body)
 
     def _ifStatement(self):
         self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")

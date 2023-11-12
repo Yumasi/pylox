@@ -57,6 +57,15 @@ class Var(Stmt):
         return visitor.visitVarStmt(self)
 
 
+@dataclass
+class While(Stmt):
+    condition: Expr
+    body: Stmt
+
+    def accept(self, visitor: "StmtVisitor[T]") -> T:
+        return visitor.visitWhileStmt(self)
+
+
 class StmtVisitor(Protocol[T]):
     def visitBlockStmt(self, stmt: Block) -> T:
         ...
@@ -71,4 +80,7 @@ class StmtVisitor(Protocol[T]):
         ...
 
     def visitVarStmt(self, stmt: Var) -> T:
+        ...
+
+    def visitWhileStmt(self, stmt: While) -> T:
         ...

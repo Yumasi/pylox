@@ -14,7 +14,7 @@ from pylox.expr import (
     Unary,
     Variable,
 )
-from pylox.stmt import Block, Expression, If, Print, Stmt, StmtVisitor, Var
+from pylox.stmt import Block, Expression, If, Print, Stmt, StmtVisitor, Var, While
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -135,6 +135,10 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
             value = self._evaluate(stmt.initializer)
 
         self.environment.define(stmt.name.lexeme, value)
+
+    def visitWhileStmt(self, stmt: While) -> None:
+        while self._isTruthy(self._evaluate(stmt.condition)):
+            self._execute(stmt.body)
 
     def visitBlockStmt(self, stmt: Block) -> None:
         self._executeBlock(stmt.statements, Environment(self.environment))
