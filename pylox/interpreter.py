@@ -14,7 +14,17 @@ from pylox.expr import (
     Unary,
     Variable,
 )
-from pylox.stmt import Block, Expression, If, Print, Stmt, StmtVisitor, Var, While
+from pylox.stmt import (
+    Break,
+    Block,
+    Expression,
+    If,
+    Print,
+    Stmt,
+    StmtVisitor,
+    Var,
+    While,
+)
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -116,6 +126,9 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
     def visitVariableExpr(self, expr: Variable) -> Any:
         return self.environment.get(expr.name)
 
+    def visitBreakStmt(self, stmt: Break) -> None:
+        raise Break()
+
     def visitExpressionStmt(self, stmt: Expression) -> None:
         self._evaluate(stmt.expression)
 
@@ -137,8 +150,11 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
         self.environment.define(stmt.name.lexeme, value)
 
     def visitWhileStmt(self, stmt: While) -> None:
-        while self._isTruthy(self._evaluate(stmt.condition)):
-            self._execute(stmt.body)
+        try:
+            while self._isTruthy(self._evaluate(stmt.condition)):
+                self._execute(stmt.body)
+        except Break:
+            pass
 
     def visitBlockStmt(self, stmt: Block) -> None:
         self._executeBlock(stmt.statements, Environment(self.environment))
@@ -203,3 +219,7 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
             return "true" if object else "false"
 
         return str(object)
+
+
+class Break(Exception):
+    pass

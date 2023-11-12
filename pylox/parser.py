@@ -12,7 +12,7 @@ from pylox.expr import (
     Unary,
     Variable,
 )
-from pylox.stmt import Block, Expression, If, Print, Stmt, Var, While
+from pylox.stmt import Break, Block, Expression, If, Print, Stmt, Var, While
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -25,6 +25,7 @@ class Parser:
     def __init__(self, tokens: List[Token]) -> None:
         self.tokens: List[Token] = tokens
         self.current: int = 0
+        self.loop_depth: int = 0
 
     def parse(self) -> List[Stmt]:
         statements: List[Stmt] = []
@@ -54,6 +55,9 @@ class Parser:
         return Var(name, initializer)
 
     def _statement(self) -> Stmt:
+        if self._match(TokenType.BREAK):
+            return self._breakStatement()
+
         if self._match(TokenType.FOR):
             return self._forStatement()
 
@@ -70,6 +74,13 @@ class Parser:
             return Block(self._block())
 
         return self._expressionStatement()
+
+    def _breakStatement(self) -> Stmt:
+        if self.loop_depth == 0:
+            self._error(self._previous(), "Must be inside a loop to use 'break'.")
+
+        self._consume(TokenType.SEMICOLON, "Expect ';' after 'break'.")
+        return Break()
 
     def _forStatement(self) -> Stmt:
         self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
@@ -92,25 +103,34 @@ class Parser:
             increment = self._expression()
         self._consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
 
-        body: Stmt = self._statement()
+        try:
+            self.loop_depth += 1
+            body: Stmt = self._statement()
 
-        if increment is not None:
-            body = Block([body, Expression(increment)])
+            if increment is not None:
+                body = Block([body, Expression(increment)])
 
-        if condition is None:
-            condition = Literal(True)
-        body = While(condition, body)
+            if condition is None:
+                condition = Literal(True)
+            body = While(condition, body)
 
-        if initializer is not None:
-            body = Block([initializer, body])
+            if initializer is not None:
+                body = Block([initializer, body])
 
-        return body
+            return body
+        finally:
+            self.loop_depth -= 1
 
     def _whileStatement(self) -> Stmt:
         self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
         condition: Expr = self._expression()
         self._consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
-        body: Stmt = self._statement()
+
+        try:
+            self.loop_depth += 1
+            body: Stmt = self._statement()
+        finally:
+            self.loop_depth -= 1
 
         return While(condition, body)
 

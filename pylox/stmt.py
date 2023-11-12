@@ -23,6 +23,12 @@ class Block(Stmt):
 
 
 @dataclass
+class Break(Stmt):
+    def accept(self, visitor: "StmtVisitor[T]") -> T:
+        return visitor.visitBreakStmt(self)
+
+
+@dataclass
 class Expression(Stmt):
     expression: Expr
 
