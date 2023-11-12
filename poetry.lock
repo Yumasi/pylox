@@ -167,14 +167,14 @@ testing = ["Django (<3.1)", "attrs", "colorama", "docopt", "pytest (<7.0.0)"]
 
 [[package]]
 name = "lsprotocol"
-version = "2023.0.0a2"
+version = "2023.0.0b1"
 description = "Python implementation of the Language Server Protocol."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "lsprotocol-2023.0.0a2-py3-none-any.whl", hash = "sha256:c4f2f77712b50d065b17f9b50d2b88c480dc2ce4bbaa56eea8269dbf54bc9701"},
-    {file = "lsprotocol-2023.0.0a2.tar.gz", hash = "sha256:80aae7e39171b49025876a524937c10be2eb986f4be700ca22ee7d186b8488aa"},
+    {file = "lsprotocol-2023.0.0b1-py3-none-any.whl", hash = "sha256:ade2cd0fa0ede7965698cb59cd05d3adbd19178fd73e83f72ef57a032fbb9d62"},
+    {file = "lsprotocol-2023.0.0b1.tar.gz", hash = "sha256:f7a2d4655cbd5639f373ddd1789807450c543341fa0a32b064ad30dbb9f510d4"},
 ]
 
 [package.dependencies]
@@ -308,6 +308,25 @@ dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
+name = "pygls"
+version = "1.1.2"
+description = "A pythonic generic language server (pronounced like 'pie glass')"
+category = "dev"
+optional = false
+python-versions = ">=3.7.9,<4"
+files = [
+    {file = "pygls-1.1.2-py3-none-any.whl", hash = "sha256:783d29c93679bb6756772f2de9b9f53b1a6fdf3fba66aeca23e87aa8aab20ecf"},
+    {file = "pygls-1.1.2.tar.gz", hash = "sha256:93fe17c01fd03307774290e685e7fa25bc1411cd72f243ff33eef21927fd0ad5"},
+]
+
+[package.dependencies]
+lsprotocol = "2023.0.0b1"
+typeguard = ">=3.0.0,<5"
+
+[package.extras]
+ws = ["websockets (>=11.0.3,<12.0.0)"]
+
+[[package]]
 name = "pylsp-mypy"
 version = "0.6.7"
 description = "Mypy linter for the Python LSP Server"
@@ -364,27 +383,6 @@ ujson = ">=3.0.0"
 
 [package.extras]
 test = ["coverage", "pycodestyle", "pyflakes", "pylint", "pytest", "pytest-cov"]
-
-[[package]]
-name = "python-lsp-ruff"
-version = "1.5.1"
-description = "Ruff linting plugin for pylsp"
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "python-lsp-ruff-1.5.1.tar.gz", hash = "sha256:caf1b8427f5aca6d2b4c300b511c47ad6b4384eee0d9562c23eccb81bf33fa01"},
-    {file = "python_lsp_ruff-1.5.1-py3-none-any.whl", hash = "sha256:85237c92fc99a8e25a38d2fad27b4a69dd4aecf0a761f60a165a0f532ebc52c1"},
-]
-
-[package.dependencies]
-lsprotocol = ">=2022.0.0a1"
-python-lsp-server = "*"
-ruff = ">=0.0.267"
-tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
-
-[package.extras]
-dev = ["pre-commit", "pytest"]
 
 [[package]]
 name = "python-lsp-server"
@@ -463,6 +461,28 @@ files = [
 ]
 
 [[package]]
+name = "ruff-lsp"
+version = "0.0.45"
+description = "A Language Server Protocol implementation for Ruff."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "ruff_lsp-0.0.45-py3-none-any.whl", hash = "sha256:6be86369fc2ed7a363d9377301beeb60130477d89d09339a2401717e158e9936"},
+    {file = "ruff_lsp-0.0.45.tar.gz", hash = "sha256:11c2d4979eabf81327b714f9395b91be1f3620a8861009ae4967f67e7de2671d"},
+]
+
+[package.dependencies]
+lsprotocol = ">=2023.0.0a1"
+packaging = ">=23.1"
+pygls = ">=1.1.0"
+ruff = ">=0.0.274"
+typing-extensions = "*"
+
+[package.extras]
+dev = ["mypy (==1.4.1)", "pip-tools (>=6.13.0,<7.0.0)", "pytest (>=7.3.1,<8.0.0)", "pytest-asyncio (==0.21.1)", "python-lsp-jsonrpc (==1.0.0)"]
+
+[[package]]
 name = "setuptools"
 version = "68.0.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
@@ -502,6 +522,25 @@ files = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
 ]
+
+[[package]]
+name = "typeguard"
+version = "4.1.5"
+description = "Run-time type checker for Python"
+category = "dev"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "typeguard-4.1.5-py3-none-any.whl", hash = "sha256:8923e55f8873caec136c892c3bed1f676eae7be57cdb94819281b3d3bc9c0953"},
+    {file = "typeguard-4.1.5.tar.gz", hash = "sha256:ea0a113bbc111bcffc90789ebb215625c963411f7096a7e9062d4e4630c155fd"},
+]
+
+[package.dependencies]
+typing-extensions = {version = ">=4.7.0", markers = "python_version < \"3.12\""}
+
+[package.extras]
+doc = ["Sphinx (>=7)", "packaging", "sphinx-autodoc-typehints (>=1.2.0)"]
+test = ["coverage[toml] (>=7)", "mypy (>=1.2.0)", "pytest (>=7)"]
 
 [[package]]
 name = "typing-extensions"
@@ -589,4 +628,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "a95be811ad40fdc1868e5548ce2c3d7562dd3ff79ce8f3969422cb3900462d54"
+content-hash = "5c9aa9eff3b794b429bcb7754405568551da9f024f526059dade9866f4b994e1"

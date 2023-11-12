@@ -10,3 +10,6 @@
 poetry run pylox        # To run in REPL mode
 poetry run pylox <script> # To execute a script
 #+end_src
+
+* Challenges left
+- [ ] Interpret and print expression in the REPL (Chapter 8)
