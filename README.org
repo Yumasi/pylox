@@ -13,3 +13,17 @@ poetry run pylox <script> # To execute a script
 
 * Challenges left
 - [ ] Interpret and print expression in the REPL (Chapter 8)
+
+* Development
+
+** Run poetry shell
+
+#+begin_src shell
+poetry shell
+#+end_src
+
+** Install pre-commit hooks
+
+#+begin_src shell
+pre-commit install
+#+end_src
