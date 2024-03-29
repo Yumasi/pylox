@@ -43,6 +43,16 @@ class Binary(Expr):
 
 
 @dataclass
+class Call(Expr):
+    callee: Optional[Expr]
+    paren: Token
+    arguments: list[Expr]
+
+    def accept(self, visitor: "ExprVisitor[T]") -> T:
+        return visitor.visitCallExpr(self)
+
+
+@dataclass
 class Grouping(Expr):
     expression: Optional[Expr]
 
@@ -93,6 +103,9 @@ class ExprVisitor(Protocol[T]):
         ...
 
     def visitBinaryExpr(self, expr: Binary) -> T:
+        ...
+
+    def visitCallExpr(self, expr: Call) -> T:
         ...
 
     def visitGroupingExpr(self, expr: Grouping) -> T:

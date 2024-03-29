@@ -1,10 +1,12 @@
-from typing import Any, List
+import time
+from typing import Any, List, cast
 
 from pylox.environment import Environment
 from pylox.error import LoxError, LoxRuntimeError
 from pylox.expr import (
     Assign,
     Binary,
+    Call,
     Conditional,
     Expr,
     ExprVisitor,
@@ -15,8 +17,8 @@ from pylox.expr import (
     Variable,
 )
 from pylox.stmt import (
-    Break,
     Block,
+    Break,
     Expression,
     If,
     Print,
@@ -31,7 +33,22 @@ from pylox.token_type import TokenType
 
 class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
     def __init__(self) -> None:
-        self.environment = Environment()
+        from pylox.callable import LoxCallable
+
+        class Clock(LoxCallable):
+            def arity(self) -> int:
+                return 0
+
+            def call(self, interpreter: "Interpreter", arguments: List[Any]) -> Any:
+                return time.time()
+
+            def __str__(self) -> str:
+                return "<native fn>"
+
+        self.globals = Environment()
+        self.environment = self.globals
+
+        self.globals.define("clock", Clock())
 
     def interpret(self, statements: List[Stmt]) -> None:
         try:
@@ -89,8 +106,29 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
         # Unreachable
         return None
 
+    def visitCallExpr(self, expr: Call) -> Any:
+        from pylox.callable import LoxCallable
+
+        callee = self._evaluate(expr.callee)
+        arguments = [self._evaluate(argument) for argument in expr.arguments]
+
+        if not isinstance(callee, LoxCallable):
+            raise LoxRuntimeError(expr.paren, "Can only call functions and classes.")
+
+        if len(arguments) != callee.arity():
+            raise LoxRuntimeError(
+                expr.paren,
+                f"Expected {callee.arity()} arguments but got {len(arguments)}.",
+            )
+
+        return callee.call(self, arguments)
+
     def visitConditionalExpr(self, expr: Conditional) -> Any:
-        return self._evaluate(expr.left) if self._evaluate(expr.condition) else self._evaluate(expr.right)  # type: ignore
+        return (
+            self._evaluate(expr.left)
+            if self._evaluate(expr.condition)
+            else self._evaluate(expr.right)
+        )  # type: ignore
 
     def visitGroupingExpr(self, expr: Grouping) -> Any:
         return self._evaluate(expr.expression)  # type: ignore

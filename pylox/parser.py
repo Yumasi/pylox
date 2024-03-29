@@ -4,6 +4,7 @@ from pylox.error import LoxError
 from pylox.expr import (
     Assign,
     Binary,
+    Call,
     Conditional,
     Expr,
     Grouping,
@@ -12,7 +13,7 @@ from pylox.expr import (
     Unary,
     Variable,
 )
-from pylox.stmt import Break, Block, Expression, If, Print, Stmt, Var, While
+from pylox.stmt import Block, Break, Expression, If, Print, Stmt, Var, While
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -284,7 +285,31 @@ class Parser:
             right = self._unary()
             return Unary(operator, right)
 
-        return self._primary()
+        return self._call()
+
+    def _finishCall(self, callee: Expr) -> Expr:
+        arguments: List[Expr] = []
+        if not self._check(TokenType.RIGHT_PAREN):
+            reachedEnd = False
+            while not reachedEnd:
+                if len(arguments) >= 255:
+                    self._error(self._peek(), "Cannot have more than 255 arguments.")
+
+                arguments.append(self._expression())
+                reachedEnd = not self._match(TokenType.COMMA)
+
+        paren = self._consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+
+        return Call(callee, paren, arguments)
+
+    def _call(self) -> Optional[Expr]:
+        expr = self._primary()
+        while True:
+            if self._match(TokenType.LEFT_PAREN):
+                expr = self._finishCall(expr)
+            else:
+                break
+        return expr
 
     def _primary(self) -> Optional[Expr]:
         if self._match(TokenType.FALSE):
