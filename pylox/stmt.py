@@ -76,6 +76,9 @@ class StmtVisitor(Protocol[T]):
     def visitBlockStmt(self, stmt: Block) -> T:
         ...
 
+    def visitBreakStmt(self, stmt: Break) -> T:
+        ...
+
     def visitExpressionStmt(self, stmt: Expression) -> T:
         ...
 
