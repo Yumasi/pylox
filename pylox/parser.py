@@ -13,7 +13,18 @@ from pylox.expr import (
     Unary,
     Variable,
 )
-from pylox.stmt import Block, Break, Expression, Function, If, Print, Stmt, Var, While
+from pylox.stmt import (
+    Block,
+    Break,
+    Expression,
+    Function,
+    If,
+    Print,
+    Return,
+    Stmt,
+    Var,
+    While,
+)
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -69,6 +80,9 @@ class Parser:
 
         if self._match(TokenType.PRINT):
             return self._printStatement()
+
+        if self._match(TokenType.RETURN):
+            return self._returnStatement()
 
         if self._match(TokenType.WHILE):
             return self._whileStatement()
@@ -153,6 +167,16 @@ class Parser:
         value = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Print(value)  # type:ignore
+
+    def _returnStatement(self) -> Stmt:
+        keyword = self._previous()
+        value: Expr = None
+
+        if not self._check(TokenType.SEMICOLON):
+            value = self._expression()  # type:ignore
+
+        self._consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return Return(keyword, value)
 
     def _expressionStatement(self) -> Stmt:
         expr = self._expression()

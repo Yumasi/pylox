@@ -151,51 +151,54 @@ primary     => NUMBER | STRING | "true" | "false" | "nil"
 
 * Functions
 #+begin_src text
-program     => declaration* EOF ;
+  program     => declaration* EOF ;
 
-declaration => funDecl
-             | varDecl
-             | statement
-statement   => exprStmt
-             | ifStmt
-             | printStmt
-             | whileStmt
-             | block ;
+  declaration => funDecl
+               | varDecl
+               | statement
+  statement   => exprStmt
+               | ifStmt
+               | printStmt
+               | returnStmt
+               | whileStmt
+               | block ;
 
-forStmt     => "for" "(" ( varDecl | exprStmt | ";" )
-               expression? ";"
-               expression? ")" statement ;
+  returnStmt => "return" expression? ";" ;
 
-whileStmt  => "while" "(" expression ")" statement ;
+  forStmt     => "for" "(" ( varDecl | exprStmt | ";" )
+                 expression? ";"
+                 expression? ")" statement ;
 
-ifStmt      => "if" "(" expression ")" statement
-               ( "else" statement )? ;
+  whileStmt  => "while" "(" expression ")" statement ;
 
-block       => "{" declaration* "}" ;
+  ifStmt      => "if" "(" expression ")" statement
+                 ( "else" statement )? ;
 
-funDecl     => "fun" function ;
-function    => IDENTIFIER "(" parameters? ")" block ;
-parameters  => IDENTIFIER ( "," IDENTIFIER )* ;
-varDecl     => "var" IDENTIFIER ( "=" expression )? ";" ;
-exprStmt    => expression ";" ;
-printStmt   => "print" expression ";" ;
+  block       => "{" declaration* "}" ;
 
-expression  => comma ;
-comma       => conditional ( "," conditional )* ;
-conditional => assignment ( "?" expression ":" conditional )? ;
-assignment  => IDENTIFIER "=" assignment
-             | logic_or ;
-logic_or    => logic_and ( "or" logic_and )* ;
-logic_and   => equality ( "and" equality )* ;
-equality    => comparison ( ("==" | "!=") comparison )* ;
-comparison  => term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-term        => factor ( ( "+" | "-" ) factor )* ;
-factor      => unary ( ( "/" | "*" ) unary )* ;
-unary       => ( "!" | "-" ) unary
-             | call;
-call        => primary ( "(" arguments? ")" )* ;
-arguments   => expression ( "," expression )* ;
-primary     => NUMBER | STRING | "true" | "false" | "nil"
-             | "(" expression ")" ;
-             | IDENTIFIER ;
+  funDecl     => "fun" function ;
+  function    => IDENTIFIER "(" parameters? ")" block ;
+  parameters  => IDENTIFIER ( "," IDENTIFIER )* ;
+  varDecl     => "var" IDENTIFIER ( "=" expression )? ";" ;
+  exprStmt    => expression ";" ;
+  printStmt   => "print" expression ";" ;
+
+  expression  => comma ;
+  comma       => conditional ( "," conditional )* ;
+  conditional => assignment ( "?" expression ":" conditional )? ;
+  assignment  => IDENTIFIER "=" assignment
+               | logic_or ;
+  logic_or    => logic_and ( "or" logic_and )* ;
+  logic_and   => equality ( "and" equality )* ;
+  equality    => comparison ( ("==" | "!=") comparison )* ;
+  comparison  => term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+  term        => factor ( ( "+" | "-" ) factor )* ;
+  factor      => unary ( ( "/" | "*" ) unary )* ;
+  unary       => ( "!" | "-" ) unary
+               | call;
+  call        => primary ( "(" arguments? ")" )* ;
+  arguments   => expression ( "," expression )* ;
+  primary     => NUMBER | STRING | "true" | "false" | "nil"
+               | "(" expression ")" ;
+               | IDENTIFIER ;
 #+end_src

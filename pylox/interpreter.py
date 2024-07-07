@@ -1,6 +1,7 @@
 import time
 from typing import Any, List
 
+import pylox.lox_return as lox_return
 from pylox.environment import Environment
 from pylox.error import LoxError, LoxRuntimeError
 from pylox.expr import (
@@ -23,6 +24,7 @@ from pylox.stmt import (
     Function,
     If,
     Print,
+    Return,
     Stmt,
     StmtVisitor,
     Var,
@@ -186,6 +188,13 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
     def visitPrintStmt(self, stmt: Print) -> None:
         value = self._evaluate(stmt.expression)
         print(self._stringify(value))
+
+    def visitReturnStmt(self, stmt: Return) -> None:
+        value: Any = None
+        if stmt.value is not None:
+            value = self._evaluate(stmt.value)
+
+        raise lox_return.Return(value)
 
     def visitVarStmt(self, stmt: Var) -> None:
         value = None

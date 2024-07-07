@@ -64,6 +64,15 @@ class Print(Stmt):
 
 
 @dataclass
+class Return(Stmt):
+    keyword: Token
+    value: Expr
+
+    def accept(self, visitor: "StmtVisitor[T]") -> T:
+        return visitor.visitReturnStmt(self)
+
+
+@dataclass
 class Var(Stmt):
     name: Token
     initializer: Optional[Expr]
@@ -93,6 +102,8 @@ class StmtVisitor(Protocol[T]):
     def visitIfStmt(self, stmt: If) -> T: ...
 
     def visitPrintStmt(self, stmt: Print) -> T: ...
+
+    def visitReturnStmt(self, stmt: Return) -> T: ...
 
     def visitVarStmt(self, stmt: Var) -> T: ...
 

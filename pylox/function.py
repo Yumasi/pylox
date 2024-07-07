@@ -4,6 +4,7 @@ from typing import Any, List
 from pylox.callable import LoxCallable
 from pylox.environment import Environment
 from pylox.interpreter import Interpreter
+from pylox.lox_return import Return
 from pylox.stmt import Function
 
 
@@ -17,7 +18,10 @@ class LoxFunction(LoxCallable):
         for i, p in enumerate(self.declaration.params):
             environment.define(p.lexeme, arguments[i])
 
-        interpreter._executeBlock(self.declaration.body, environment)
+        try:
+            interpreter._executeBlock(self.declaration.body, environment)
+        except Return as r:
+            return r.value
 
         return None
 
