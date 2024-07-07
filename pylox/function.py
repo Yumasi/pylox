@@ -11,9 +11,10 @@ from pylox.stmt import Function
 @dataclass
 class LoxFunction(LoxCallable):
     declaration: Function
+    closure: Environment
 
     def call(self, interpreter: Interpreter, arguments: List[Any]) -> Any:
-        environment = Environment(interpreter.globals)
+        environment = Environment(self.closure)
 
         for i, p in enumerate(self.declaration.params):
             environment.define(p.lexeme, arguments[i])

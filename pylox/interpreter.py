@@ -176,7 +176,7 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
     def visitFunctionStmt(self, stmt: Function) -> None:
         from pylox.function import LoxFunction
 
-        function = LoxFunction(stmt)
+        function = LoxFunction(stmt, self.environment)
         self.environment.define(stmt.name.lexeme, function)
 
     def visitIfStmt(self, stmt: If) -> None:
