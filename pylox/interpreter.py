@@ -1,5 +1,5 @@
 import time
-from typing import Any, List, cast
+from typing import Any, List
 
 from pylox.environment import Environment
 from pylox.error import LoxError, LoxRuntimeError
@@ -20,6 +20,7 @@ from pylox.stmt import (
     Block,
     Break,
     Expression,
+    Function,
     If,
     Print,
     Stmt,
@@ -169,6 +170,12 @@ class Interpreter(ExprVisitor[Any], StmtVisitor[None]):
 
     def visitExpressionStmt(self, stmt: Expression) -> None:
         self._evaluate(stmt.expression)
+
+    def visitFunctionStmt(self, stmt: Function) -> None:
+        from pylox.function import LoxFunction
+
+        function = LoxFunction(stmt)
+        self.environment.define(stmt.name.lexeme, function)
 
     def visitIfStmt(self, stmt: If) -> None:
         if self._isTruthy(self._evaluate(stmt.condition)):

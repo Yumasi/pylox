@@ -13,7 +13,7 @@ from pylox.expr import (
     Unary,
     Variable,
 )
-from pylox.stmt import Block, Break, Expression, If, Print, Stmt, Var, While
+from pylox.stmt import Block, Break, Expression, Function, If, Print, Stmt, Var, While
 from pylox.token import Token
 from pylox.token_type import TokenType
 
@@ -37,6 +37,8 @@ class Parser:
 
     def _declaration(self) -> Optional[Stmt]:
         try:
+            if self._match(TokenType.FUN):
+                return self._function("function")
             if self._match(TokenType.VAR):
                 return self._varDeclaration()
 
@@ -156,6 +158,30 @@ class Parser:
         expr = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return Expression(expr)  # type:ignore
+
+    def _function(self, kind: str) -> Function:
+        name = self._consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
+
+        self._consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
+        parameters: List[Token] = []
+
+        if not self._check(TokenType.RIGHT_PAREN):
+            hasMore = True
+            while hasMore:
+                if len(parameters) >= 255:
+                    self._error(self._peek(), "Can't have more than 255 parameters.")
+
+                parameters.append(
+                    self._consume(TokenType.IDENTIFIER, "Expect parameter name.")
+                )
+                hasMore = self._match(TokenType.COMMA)
+
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+
+        self._consume(TokenType.LEFT_BRACE, f"Expect '{{' before {kind} body.")
+        body = self._block()
+
+        return Function(name, parameters, body)
 
     def _block(self) -> List[Stmt]:
         statements: List[Stmt] = []
@@ -290,13 +316,13 @@ class Parser:
     def _finishCall(self, callee: Expr) -> Expr:
         arguments: List[Expr] = []
         if not self._check(TokenType.RIGHT_PAREN):
-            reachedEnd = False
-            while not reachedEnd:
+            hasMore = True
+            while hasMore:
                 if len(arguments) >= 255:
                     self._error(self._peek(), "Cannot have more than 255 arguments.")
 
-                arguments.append(self._expression())
-                reachedEnd = not self._match(TokenType.COMMA)
+                arguments.append(self._conditional())
+                hasMore = self._match(TokenType.COMMA)
 
         paren = self._consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
 

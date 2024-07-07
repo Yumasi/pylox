@@ -36,6 +36,16 @@ class Expression(Stmt):
 
 
 @dataclass
+class Function(Stmt):
+    name: Token
+    params: List[Token]
+    body: List[Stmt]
+
+    def accept(self, visitor: "StmtVisitor[T]") -> T:
+        return visitor.visitFunctionStmt(self)
+
+
+@dataclass
 class If(Stmt):
     condition: Expr
     thenBranch: Stmt
@@ -77,6 +87,8 @@ class StmtVisitor(Protocol[T]):
     def visitBreakStmt(self, stmt: Break) -> T: ...
 
     def visitExpressionStmt(self, stmt: Expression) -> T: ...
+
+    def visitFunctionStmt(self, stmt: Function) -> T: ...
 
     def visitIfStmt(self, stmt: If) -> T: ...
 
