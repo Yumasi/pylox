@@ -1,28 +1,34 @@
-[tool.poetry]
+[project]
+authors = [
+    {name = "Guillaume Pagnoux", email = "gpagnoux@gmail.com"},
+]
+requires-python = "<4.0,>=3.10"
+dependencies = []
 name = "pylox"
 version = "0.1.0"
 description = "A Python implementation of the Lox language"
-authors = ["Guillaume Pagnoux <gpagnoux@gmail.com>"]
-readme = "README.org"
+readme = "README.md"
 
-[tool.poetry.dependencies]
-python = "^3.10"
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^3.5.0"
-pylsp-mypy = "^0.6.7"
-python-lsp-server = "^1.7.4"
-pyupgrade = "^3.10.1"
-ruff-lsp = "^0.0.45"
-
-[tool.poetry.scripts]
+[project.scripts]
 pylox = "pylox:main"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pre-commit<4.0.0,>=3.5.0",
+    "pylsp-mypy<1.0.0,>=0.6.7",
+    "python-lsp-server<2.0.0,>=1.7.4",
+    "pyupgrade<4.0.0,>=3.10.1",
+    "ruff-lsp<1.0.0,>=0.0.45",
+]
 
 [tool.ruff]
 fix = true
 lint.select = [ "E", "F", "I", "UP" ]
 line-length = 88
 
+[tool.pdm.build]
+includes = []
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
